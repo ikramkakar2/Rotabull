@@ -1,5 +1,6 @@
 require('dotenv').config();
 const axios = require('axios');
+const cron = require('node-cron'); // ⏱️ Added for scheduling
 
 const ROTABULL_API_KEY = process.env.ROTABULL_API_KEY;
 const GHL_API_KEY = process.env.GHL_API_KEY;
@@ -8,7 +9,6 @@ const fetchRFQs = async () => {
   try {
     console.log("🔁 Running task at", new Date().toLocaleTimeString());
 
-    // Get RFQs from Rotabull
     const response = await axios.get('https://app.rotabull.com/api/v1/deals', {
       headers: {
         'Authorization': `Bearer ${ROTABULL_API_KEY}`,
@@ -26,26 +26,23 @@ const fetchRFQs = async () => {
       const fullName = contact.name || '';
       const company = contact.company_name || 'Unknown Company';
 
-      // Skip if no email
       if (!email) {
         console.log(`🚫 Skipped: No email or phone: ${fullName}`);
         continue;
       }
 
-      // Split full name into first and last
       const nameParts = fullName.trim().split(' ');
       const firstName = nameParts[0] || '';
       const lastName = nameParts.slice(1).join(' ') || '';
 
-      // Log before sending
       console.log(`➡️  Sending to GHL: ${email} | ${firstName} ${lastName} | ${company}`);
 
-      // Send or update contact in GHL
       await axios.post('https://rest.gohighlevel.com/v1/contacts/', {
         email,
         firstName,
         lastName,
-        companyName: company
+        companyName: company,
+        tags: ["rotabull"]
       }, {
         headers: {
           'Authorization': `Bearer ${GHL_API_KEY}`,
@@ -61,4 +58,5 @@ const fetchRFQs = async () => {
   }
 };
 
-fetchRFQs();
+// ⏱️ Run fetchRFQs every 5 minutes
+cron.schedule('*/5 * * * *', fetchRFQs);
