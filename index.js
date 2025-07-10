@@ -1,8 +1,15 @@
 require('dotenv').config();
 const axios = require('axios');
+const { parsePhoneNumber } = require('libphonenumber-js');
 
-const ROTABULL_API_KEY = process.env.ROTABULL_API_KEY;
-const GHL_API_KEY = process.env.GHL_API_KEY;
+const formatPhone = (rawPhone) => {
+  try {
+    const phoneNumber = parsePhoneNumber(rawPhone);
+    return phoneNumber.format('E.164'); // like +1234567890
+  } catch {
+    return null; // if phone is invalid
+  }
+};
 
 const fetchRFQs = async () => {
   try {
@@ -24,9 +31,11 @@ const fetchRFQs = async () => {
       const email = contact.email;
       const fullName = contact.name || '';
       const company = contact.company_name || 'Unknown Company';
+      const rawPhone = contact.phone || '';
+      const phone = formatPhone(rawPhone);
 
-      if (!email) {
-        console.log(`🚫 Skipped: No email or phone: ${fullName}`);
+      if (!email && !phone) {
+        console.log(`🚫 Skipped: No email or valid phone: ${fullName}`);
         continue;
       }
 
@@ -34,10 +43,11 @@ const fetchRFQs = async () => {
       const firstName = nameParts[0] || '';
       const lastName = nameParts.slice(1).join(' ') || '';
 
-      console.log(`➡️  Sending to GHL: ${email} | ${firstName} ${lastName} | ${company}`);
+      console.log(`➡️  Sending to GHL: ${email || 'No Email'} | ${firstName} ${lastName} | ${company} | ${phone || 'No Valid Phone'}`);
 
       await axios.post('https://rest.gohighlevel.com/v1/contacts/', {
         email,
+        phone,
         firstName,
         lastName,
         companyName: company,
@@ -49,7 +59,7 @@ const fetchRFQs = async () => {
         }
       });
 
-      console.log(`✅ Sent/Updated: ${email}`);
+      console.log(`✅ Sent/Updated: ${email || phone}`);
     }
 
   } catch (error) {
@@ -57,5 +67,4 @@ const fetchRFQs = async () => {
   }
 };
 
-// ✅ Just run it directly
 fetchRFQs();
