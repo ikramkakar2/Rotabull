@@ -2,15 +2,21 @@ require('dotenv').config();
 const axios = require('axios');
 const { parsePhoneNumber } = require('libphonenumber-js');
 
+// ✅ Load API Keys from .env
+const ROTABULL_API_KEY = process.env.ROTABULL_API_KEY;
+const GHL_API_KEY = process.env.GHL_API_KEY;
+
+// ✅ Format phone numbers properly
 const formatPhone = (rawPhone) => {
   try {
     const phoneNumber = parsePhoneNumber(rawPhone);
-    return phoneNumber.format('E.164'); // like +1234567890
+    return phoneNumber.format('E.164'); // Example: +1234567890
   } catch {
-    return null; // if phone is invalid
+    return null; // Invalid phone format
   }
 };
 
+// ✅ Main function
 const fetchRFQs = async () => {
   try {
     console.log("🔁 Running task at", new Date().toLocaleTimeString());
@@ -67,4 +73,5 @@ const fetchRFQs = async () => {
   }
 };
 
+// ✅ Run the function once
 fetchRFQs();
