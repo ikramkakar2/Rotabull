@@ -15,6 +15,5 @@
     "@api/rotabull": "file:.api/apis/rotabull",
     "axios": "^1.10.0",
     "dotenv": "^17.1.0",
-    "node-cron": "^4.2.1"
   }
 }
