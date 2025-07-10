@@ -1,6 +1,5 @@
 require('dotenv').config();
 const axios = require('axios');
-const cron = require('node-cron'); // ⏱️ Added for scheduling
 
 const ROTABULL_API_KEY = process.env.ROTABULL_API_KEY;
 const GHL_API_KEY = process.env.GHL_API_KEY;
@@ -58,5 +57,5 @@ const fetchRFQs = async () => {
   }
 };
 
-// ⏱️ Run fetchRFQs every 5 minutes
-cron.schedule('*/5 * * * *', fetchRFQs);
+// ✅ Just run it directly
+fetchRFQs();
